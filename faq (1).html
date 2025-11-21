@@ -201,10 +201,35 @@
             pointer-events: auto;
         }
 
+        /* Dropdown logout agar selalu di atas konten utama */
+        #user-menu-wrapper {
+            position: relative;
+            z-index: 60;
+        }
+
+        #user-menu-dropdown {
+            box-shadow: 0 10px 30px rgba(185, 28, 28, 0.35);
+            z-index: 999;
+        }
+
+        #user-menu-button:hover {
+            transform: scale(1.05);
+            filter: drop-shadow(0 6px 18px rgba(6, 182, 212, 0.25));
+        }
+
+        #logout-button {
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        #logout-button:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
         /* Modern Header with Glassmorphism */
         header {
             position: relative;
-            overflow: hidden;
+            overflow: visible;
+            z-index: 40;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -937,9 +962,16 @@
             }
         }
 
-        /* Ensure chat container doesn't overlap with floating input */
+        /* Ensure chat container stays behind header & floating input */
         #chat-container {
             padding-bottom: 120px !important;
+            position: relative;
+            z-index: 0;
+        }
+
+        #user-menu-button,
+        #logout-button {
+            cursor: pointer;
         }
     </style>
 </head>
@@ -1047,13 +1079,23 @@
                             <rect x="3" y="14" width="7" height="7"></rect>
                         </svg>
                     </button>
-                    <!-- Ikon User -->
-                    <button class="p-2 rounded-lg hover:bg-white/10 transition-all duration-300">
-                        <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </button>
+                    <!-- Ikon User + Dropdown Logout -->
+                    <div class="relative" id="user-menu-wrapper">
+                        <button id="user-menu-button" class="p-2 rounded-lg hover:bg-white/10 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-400/60">
+                            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </button>
+                        <div id="user-menu-dropdown" class="absolute right-0 mt-3 w-44 rounded-2xl border border-red-300/50 bg-red-600/95 text-white shadow-2xl hidden z-30 transition-all duration-200 origin-top">
+                            <button id="logout-button" class="w-full px-4 py-3 text-sm font-semibold flex items-center gap-2 hover:bg-white/10 rounded-2xl transition-colors duration-200">
+                                <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6A2.25 2.25 0 0 0 5.25 5.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l-3 3m0 0 3 3m-3-3h12.75"/>
+                                </svg>
+                                Log Out
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -1706,6 +1748,10 @@
         const chatContainer = document.getElementById('chat-container');
         const initialStateHtml = chatContainer.innerHTML; // Simpan tampilan awal
         const chatBaruBtn = document.getElementById('chat-baru-btn');
+        const userMenuWrapper = document.getElementById('user-menu-wrapper');
+        const userMenuButton = document.getElementById('user-menu-button');
+        const userMenuDropdown = document.getElementById('user-menu-dropdown');
+        const logoutButton = document.getElementById('logout-button');
 
         let currentQuestions = []; // Menyimpan sisa pertanyaan di kategori saat ini
 
@@ -2011,7 +2057,29 @@
                     toggleDropdown(false);
                 }
             }
+
+            if (userMenuWrapper && !userMenuWrapper.contains(e.target)) {
+                if (userMenuDropdown && !userMenuDropdown.classList.contains('hidden')) {
+                    userMenuDropdown.classList.add('hidden');
+                }
+            }
         });
+
+        if (userMenuButton && userMenuDropdown) {
+            userMenuButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                userMenuDropdown.classList.toggle('hidden');
+            });
+        }
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                if (userMenuDropdown && !userMenuDropdown.classList.contains('hidden')) {
+                    userMenuDropdown.classList.add('hidden');
+                }
+                window.location.href = 'index.html';
+            });
+        }
 
         // Tampilkan pilihan kategori saat halaman pertama kali dimuat
         window.addEventListener('DOMContentLoaded', function() {
